@@ -1,2 +1,2 @@
-# DIP_Radon_Transform
-Course project for Digital Image Processing – applying Radon Transform on facial images.
+# DIP_Deepfake_Detection
+Course project for Digital Image Processing 
