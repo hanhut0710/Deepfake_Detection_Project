@@ -9,7 +9,7 @@ original_path = os.path.join(dataset_root, "FaceForensics++_C23", "Original")
 deepfakes_path = os.path.join(dataset_root, "FaceForensics++_C23", "Deepfakes")
 
 # dataset subset
-subset_root = os.path.join(dataset_root, "subset")
+subset_root = os.path.join(r"D:\TaiLieuHocTap\Deepfake_Detection_Project\src\data\video", "subset")
 subset_real = os.path.join(subset_root, "real")
 subset_fake = os.path.join(subset_root, "fake")
 
