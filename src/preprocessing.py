@@ -7,9 +7,11 @@ from sklearn.model_selection import train_test_split
 from facenet_pytorch import MTCNN
 from tqdm import tqdm
 
-INPUT_DIR = "data/video"
-SPLIT_DIR = "data"
-OUTPUT_DIR = "dataset_faces"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+INPUT_DIR = os.path.join(BASE_DIR, "data", "video")
+SPLIT_DIR = os.path.join(BASE_DIR, "data")
+OUTPUT_DIR = os.path.join(BASE_DIR, "dataset_faces")
 
 FRAMES_PER_VIDEO = 20
 IMG_SIZE = 224
