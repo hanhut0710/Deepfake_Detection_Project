@@ -1,5 +1,4 @@
 import torch
-from config import Config
 
 def train_one_epoch(model, dataloader, criterion, optimizer, device):
     model.train()
@@ -49,7 +48,7 @@ def evaluate(model, dataloader, criterion, device):
 
     return epoch_loss, epoch_acc.item()
 
-def train_model(model, train_loader, val_loader, criterion, optimizer, device, num_epochs):
+def train_model(model, train_loader, val_loader, criterion, optimizer, device, num_epochs, config=None):
     best_val_acc = 0.0
 
     for epoch in range(num_epochs):
@@ -60,7 +59,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, device, n
 
         if val_acc > best_val_acc:
             best_val_acc = val_acc
-            torch.save(model.state_dict(), f'models/{Config.MODEL_NAME}.pth')
+            torch.save(model.state_dict(), f'models/{config.MODEL_NAME}.pth')
             print('Best model saved with Val Acc: {:.4f}'.format(best_val_acc))
 
 

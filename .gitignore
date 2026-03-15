@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+# Ignore model checkpoints
+checkpoints/
+# Ignore logs
+logs/
+# Ignore dataset folders
+data/
+video/

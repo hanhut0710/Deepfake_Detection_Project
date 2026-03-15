@@ -166,8 +166,41 @@ def preprocess():
                 process_video(video_path, save_dir, cls, vid_id)
 
 
+def prepare_face_dataset():
+    base_dir = os.path.join(SPLIT_DIR, 'dataset_faces')
+
+    for split in ["train", "val", "test"]:
+
+        count = 0
+        split_dir = os.path.join(base_dir, split)
+
+        real_dir = os.path.join(split_dir, "real")
+        fake_dir = os.path.join(split_dir, "fake")
+
+        os.makedirs(real_dir, exist_ok=True)
+        os.makedirs(fake_dir, exist_ok=True)
+
+        files = os.listdir(split_dir)  
+
+        for img in files:
+
+            src_path = os.path.join(split_dir, img)
+
+            if not os.path.isfile(src_path):
+                continue
+
+            name = img.lower()
+
+            if "real" in name:
+                shutil.move(src_path, os.path.join(real_dir, img))
+                count += 1
+
+            elif "fake" in name:
+                shutil.move(src_path, os.path.join(fake_dir, img))
+                count += 1
+                
+            print(f"moved {count} face in {split}")
+
 if __name__ == "__main__":
 
-    split_dataset()
-
-    preprocess()
+   prepare_face_dataset()

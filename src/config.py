@@ -1,5 +1,10 @@
 import torch
 import os
+from pathlib import Path
+
+Project_ROOT = Path(__file__).parent
+
+Data_DIR = Project_ROOT / "data" / "dataset_faces"
 
 # Cấu hình chung
 class Config:
@@ -16,9 +21,9 @@ class Config:
         self.MODEL_NAME = model_name or None
 
         # Paths
-        self.TRAIN_DIR = r"src\data\face\train"
-        self.VAL_DIR = r"src\data\face\val"
-        self.TEST_DIR = r"src\data\face\test"
+        self.TRAIN_DIR = Data_DIR / "train"
+        self.VAL_DIR = Data_DIR / "val"
+        self.TEST_DIR = Data_DIR / "test"
 
 
 
