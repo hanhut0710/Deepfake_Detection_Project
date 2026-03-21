@@ -19,6 +19,7 @@ class Config:
         self.Epochs = 20
         self.IMAGE_SIZE = (224, 224)
         self.MODEL_NAME = model_name or None
+        self.Dropout = 0.3
 
         # Paths
         self.TRAIN_DIR = Data_DIR / "train"

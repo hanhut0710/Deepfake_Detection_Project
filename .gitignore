@@ -8,4 +8,6 @@ checkpoints/
 logs/
 # Ignore dataset folders
 data/
-video/
+video_900/
+video_100/
+experiments/

@@ -4,7 +4,11 @@ from torch.utils.data import DataLoader
 def get_transforms(config=None):
     train_transform = transforms.Compose([
         transforms.Resize(config.IMAGE_SIZE),
-        transforms.RandomHorizontalFlip(),
+        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
+        transforms.RandomHorizontalFlip(p=0.5),
+        transforms.RandomApply([
+            transforms.GaussianBlur(3)
+        ], p=0.3),
         transforms.ToTensor(),
         transforms.Normalize(
             mean=[0.485, 0.456, 0.406],

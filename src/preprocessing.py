@@ -9,9 +9,9 @@ from tqdm import tqdm
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-INPUT_DIR = os.path.join(BASE_DIR, "data", "video")
+INPUT_DIR = os.path.join(BASE_DIR, "data", "video_test")
 SPLIT_DIR = os.path.join(BASE_DIR, "data")
-OUTPUT_DIR = os.path.join(BASE_DIR, "dataset_faces")
+OUTPUT_DIR = os.path.join(BASE_DIR, "data", "dataset_faces")
 
 FRAMES_PER_VIDEO = 20
 IMG_SIZE = 224
@@ -138,6 +138,31 @@ def process_video(video_path, save_dir, cls, vid_id):
 
     return saved
 
+def process_video_from_outsource(video_path):
+
+    cap = cv2.VideoCapture(video_path)
+
+    frame_ids = sample_frames(cap)
+
+    faces = []
+
+    for frame_id in frame_ids:
+        cap.set(cv2.CAP_PROP_POS_FRAMES, frame_id)
+
+        ret, frame = cap.read()
+
+        if not ret:
+            continue
+
+        face = extract_face(frame)
+        if face is None:
+            continue
+
+        faces.append(face)
+    cap.release()
+    return faces
+
+
 #  PREPROCESS DATASET
 
 
@@ -157,13 +182,15 @@ def preprocess():
 
             videos = os.listdir(video_dir)
 
-            for idx, vid in enumerate(tqdm(videos, desc=f"{split}-{cls}")):
+            if split == "test" and cls == "fake":
+                
+                for idx, vid in enumerate(tqdm(videos, desc=f"{split}-{cls}")):
 
-                video_path = os.path.join(video_dir, vid)
+                    video_path = os.path.join(video_dir, vid)
 
-                vid_id = f"{idx:04d}"
+                    vid_id = f"{idx:04d}"
 
-                process_video(video_path, save_dir, cls, vid_id)
+                    process_video(video_path, save_dir, cls, vid_id)
 
 
 def prepare_face_dataset():

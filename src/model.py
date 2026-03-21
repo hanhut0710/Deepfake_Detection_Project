@@ -5,7 +5,10 @@ import torch
 def get_model(num_classes=1, config=None):
     if config.MODEL_NAME == "resnet18":
         model = models.resnet18(pretrained=True)
-        model.fc = nn.Linear(model.fc.in_features, num_classes)
+        model.fc = nn.Sequential(
+            nn.Dropout(0.3),
+            nn.Linear(model.fc.in_features, 1)
+        )
     elif config.MODEL_NAME == "efficientnet_b0":
         model = models.efficientnet_b0(pretrained=True)
         model.classifier[1] = nn.Linear(model.classifier[1].in_features, num_classes)
