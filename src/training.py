@@ -97,7 +97,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler
             f"Epoch {epoch+1}/{num_epochs} | "
             f"Train Loss {train_loss:.4f} | Train Acc {train_acc:.4f} | "
             f"Val Loss {val_loss:.4f} | Val Acc {val_acc:.4f} | "
-            f"Learning rate {current_lr:.6f}"
+            f"Learning rate {current_lr:.9f}"
         )
 
         history['train_acc'].append(train_acc)
@@ -108,7 +108,7 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler
 
         scheduler.step(val_loss)
 
-        if val_acc > best_val_acc and best_val_loss > val_loss:
+        if val_acc > best_val_acc or best_val_loss > val_loss:
 
             best_val_acc = val_acc
             best_val_loss = val_loss
@@ -156,17 +156,17 @@ def predict_test(model, test_loader, device, model_path = None):
             output = model(inputs)  
 
             probs = torch.sigmoid(output)
-            preds = (probs > 0.5).float()
+            preds = (probs > 0.6).float()
 
             correct += torch.sum(preds == labels).item()
             total += labels.size(0)
 
             all_preds.extend(preds.cpu().numpy().flatten())
             all_labels.extend(labels.cpu().numpy().flatten())
-            all_probs.extend(probs.cpu().numpy.flatten())
+            all_probs.extend(probs.cpu().numpy().flatten())
     
     acc = correct / total
 
     print(f"Test Accuracy: {acc}")
 
-    return acc, all_preds, all_labels, probs
+    return acc, all_preds, all_labels, all_probs

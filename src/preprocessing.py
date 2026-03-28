@@ -99,7 +99,7 @@ def extract_face(frame):
 
     face = cv2.resize(face, (IMG_SIZE, IMG_SIZE))
 
-    return face
+    return face, (x1, y1, x2, y2)
 
 # PROCESS VIDEO
 
@@ -121,7 +121,7 @@ def process_video(video_path, save_dir, cls, vid_id):
         if not ret:
             continue
 
-        face = extract_face(frame)
+        face, _ = extract_face(frame)
 
         if face is None:
             continue
@@ -154,7 +154,12 @@ def process_video_from_outsource(video_path):
         if not ret:
             continue
 
-        face = extract_face(frame)
+        result = extract_face(frame)
+
+        if not result:
+            continue
+
+        face, _ = result
         if face is None:
             continue
 

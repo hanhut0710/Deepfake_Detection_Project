@@ -14,7 +14,7 @@ def get_model(num_classes=1, config=None):
         model.classifier[1] = nn.Linear(model.classifier[1].in_features, num_classes)
     elif config.MODEL_NAME == "mobilenet_v3":
         model = models.mobilenet_v3_small(pretrained=True)
-        model.classifier[1] = nn.Linear(model.classifier[1].in_features, num_classes)
+        model.classifier[3] = nn.Linear(model.classifier[3].in_features, num_classes)
     else:
         raise ValueError("Unsupported model name. Use 'resnet18' or 'efficientnet_b0' or 'mobilenet_v3'.")
 
