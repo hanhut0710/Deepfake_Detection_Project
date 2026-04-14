@@ -8,16 +8,19 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc, confusion_matrix, classification_report
 from collections import Counter
 
-def load_model(model_path, model, device = None):
+def load_model(model_path, model, optimizer, scheduler, device = None):
     if (device is None):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     checkpoint = torch.load(model_path, map_location=device)
+
     model.load_state_dict(checkpoint['model_state_dict'])
+    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
     history = checkpoint['history']
 
     model.to(device)
     model.eval()
-    return model, history
+    return model, optimizer, scheduler, history
 
 def predict_frame(model, image, transform, device):
 
@@ -192,8 +195,19 @@ def plot_all_splits(cnf):
         counts = list(counter.values())
 
         plt.subplot(1,3,i)
-        plt.bar(classes, counts)
+        bars = plt.bar(classes, counts)
         plt.xticks(classes, ["Fake", "Real"])
+
+        for bar in bars:
+            height = bar.get_height()
+            plt.text(
+                bar.get_x() + bar.get_width() / 2,
+                height + 1,
+                str(int(height)),
+                ha='center',
+                va='bottom'
+            )
+
         plt.title(name)
 
     plt.tight_layout()
@@ -201,7 +215,6 @@ def plot_all_splits(cnf):
 
 def predict_video_visual(model, video_path, transform, device, output_path="output.mp4"):
 
-    print("cc")
     model.eval()
 
     cap = cv2.VideoCapture(video_path)
