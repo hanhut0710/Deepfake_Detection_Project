@@ -69,6 +69,40 @@ def predict_video(model, video_path, transform, device):
 
     return label, score
 
+def predict_video_with_LSTM(model, video_path, transform, device):
+    model.eval()
+
+    faces = process_video_from_outsource(video_path)
+
+    if len(faces) == 0:
+        print("No face detected")
+        return "No Face", 0.0
+
+    frames = []
+
+    for face in faces:
+        image = Image.fromarray(face)
+        image = transform(image)
+        frames.append(image)
+
+    # stack thành sequence
+    frames = torch.stack(frames)  # (seq_len, 3,224,224)
+
+    # thêm batch dimension
+    frames = frames.unsqueeze(0).to(device)  
+    # shape: (1,20,3,224,224)
+
+    with torch.no_grad():
+        output = model(frames)
+        prob = torch.sigmoid(output).item()
+
+    label = "Fake" if prob > 0.5 else "Real"
+
+    print("Probability:", prob)
+    print("Video prediction:", label)
+
+    return label, prob
+
 def plot_history(history):
 
     epochs = range(1, len(history["train_loss"]) + 1)
@@ -349,3 +383,132 @@ def predict_video_visual(model, video_path, transform, device, output_path="outp
     out.release()
 
     print(f"Saved video to {output_path}")
+
+def predict_video_visual_with_LSTM(model, video_path, transform, device, output_path="output_lstm.mp4"):
+
+    # Tương tự như predict_video_visual nhưng sử dụng model LSTM để dự đoán trên toàn bộ sequence frames
+
+    # Code sẽ được triển khai tương tự như predict_video_visual nhưng thay vì dự đoán từng frame, ta sẽ thu thập frames vào một buffer và sau đó đưa toàn bộ sequence vào model LSTM để dự đoán.
+
+    model.eval()
+
+    cap = cv2.VideoCapture(video_path)
+
+    if not cap.isOpened():
+        print("Cannot open video")
+        return 
+    
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
+    h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+
+    if fps == 0:
+        fps = 25
+
+    # We'll store both the full frames and the face crops + their bboxes so
+    # we can run the LSTM on the face crops but draw text on the full frames.
+    frame_buffer_full = []
+    face_buffer = []
+    bbox_buffer = []
+
+    frame_count = 0
+
+    fourcc = cv2.VideoWriter_fourcc(*"H264")
+    out = cv2.VideoWriter(output_path, fourcc, fps, (w, h))
+
+    while True:
+        ret, frame = cap.read()
+
+        if not ret:
+            break
+
+        frame = cv2.resize(frame, (w, h))
+
+        result = extract_face(frame)
+
+        if not result:
+            continue
+
+        face, (x1, y1, x2, y2) = result
+
+        if face is not None:
+            face_pil = Image.fromarray(cv2.cvtColor(face, cv2.COLOR_BGR2RGB))
+
+            # keep aligned buffers
+            face_buffer.append(face_pil)
+            frame_buffer_full.append(frame.copy())
+            bbox_buffer.append((x1, y1, x2, y2))
+
+        frame_count += 1
+        if frame_count % 30 == 0:
+            print(f"Processed {frame_count} frames...")
+
+    cap.release()
+
+    if len(face_buffer) == 0:
+        print("No face detected in entire video")
+        return
+
+    # Prepare sequence frames for LSTM (from face crops)
+    frames = [transform(face).unsqueeze(0) for face in face_buffer]
+    frames = torch.cat(frames, dim=0).unsqueeze(0).to(device)  # shape: (1, seq_len, 3, 224, 224)
+
+    with torch.no_grad():
+        output = model(frames)
+        prob = torch.sigmoid(output).item()
+
+    final_label = "Fake" if prob > 0.5 else "Real"
+
+    text = f"Predict: {final_label} | Confidence: {prob:.2f}"
+
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    font_scale = 0.9
+    thickness = 1
+
+    (text_w, text_h), _ = cv2.getTextSize(text, font, font_scale, thickness)
+
+    for idx, frame in enumerate(frame_buffer_full):
+
+        x1, y1, x2, y2 = bbox_buffer[idx]
+
+        x = x1
+        y = y1 - 10
+        if y < text_h:
+            y = y1 + text_h + 10
+
+        color = (0, 255, 0) if final_label == "Real" else (0, 0, 255)
+
+        cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+
+        # draw either final text or probability
+        if idx > int(0.8 * len(frame_buffer_full)):
+            cv2.putText(
+                frame,
+                text,
+                (x, y),
+                font,
+                font_scale,
+                color,
+                thickness,
+                cv2.LINE_AA,
+            )
+        else:
+            cv2.putText(
+                frame,
+                f"Probability: ({prob:.2f})",
+                (x, y),
+                font,
+                font_scale,
+                color,
+                thickness,
+                cv2.LINE_AA,
+            )
+
+        out.write(frame)
+
+    out.release()
+
+    print(f"Saved video to {output_path}")
+
+
+

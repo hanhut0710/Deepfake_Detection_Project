@@ -12,6 +12,7 @@ class Config:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         
         # Model parameters
+        self.Batch_size_seq = 4
         self.Batch_size = 16
         self.Num_workers = 2
         self.pin_memory = True if torch.cuda.is_available() else False

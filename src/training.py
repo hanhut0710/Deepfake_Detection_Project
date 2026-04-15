@@ -34,35 +34,6 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device, scaler):
 
     return epoch_loss, epoch_acc.item()
 
-def evaluate(model, dataloader, criterion, device):
-    model.eval()
-
-    running_loss = 0.0
-    correct_predictions = 0
-    total_samples = 0
-
-    with torch.no_grad():
-        for inputs, labels in dataloader:
-
-            inputs = inputs.to(device)
-            labels = labels.float().unsqueeze(1).to(device)
-
-            with autocast():
-                outputs = model(inputs)
-                loss = criterion(outputs, labels)
-
-            running_loss += loss.item() * inputs.size(0)
-
-            probs = torch.sigmoid(outputs)
-            preds = (probs > 0.5).float()
-
-            correct_predictions += torch.sum(preds == labels)
-            total_samples += inputs.size(0)
-
-    epoch_loss = running_loss / total_samples
-    epoch_acc = correct_predictions.double() / total_samples
-
-    return epoch_loss, epoch_acc.item()
 
 def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler, device, num_epochs, config):
 
@@ -131,6 +102,35 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler
             print("⛔ Early stopping triggered")
             break
 
+def evaluate(model, dataloader, criterion, device):
+    model.eval()
+
+    running_loss = 0.0
+    correct_predictions = 0
+    total_samples = 0
+
+    with torch.no_grad():
+        for inputs, labels in dataloader:
+
+            inputs = inputs.to(device)
+            labels = labels.float().unsqueeze(1).to(device)
+
+            with autocast():
+                outputs = model(inputs)
+                loss = criterion(outputs, labels)
+
+            running_loss += loss.item() * inputs.size(0)
+
+            probs = torch.sigmoid(outputs)
+            preds = (probs > 0.5).float()
+
+            correct_predictions += torch.sum(preds == labels)
+            total_samples += inputs.size(0)
+
+    epoch_loss = running_loss / total_samples
+    epoch_acc = correct_predictions.double() / total_samples
+
+    return epoch_loss, epoch_acc.item()
 
 def predict_test(model, test_loader, device, model_path = None):
 
@@ -156,7 +156,7 @@ def predict_test(model, test_loader, device, model_path = None):
             output = model(inputs)  
 
             probs = torch.sigmoid(output)
-            preds = (probs > 0.6).float()
+            preds = (probs > 0.5).float()
 
             correct += torch.sum(preds == labels).item()
             total += labels.size(0)
