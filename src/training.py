@@ -35,7 +35,7 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device, scaler):
     return epoch_loss, epoch_acc.item()
 
 
-def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler, device, num_epochs, config):
+def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler, device, num_epochs, config, history=None):
 
     scaler = GradScaler()
 
@@ -44,7 +44,8 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, scheduler
     patience = 5
     patience_counter = 0
 
-    history = {
+    if history == None:
+        history = {
         "train_loss": [],
         "val_loss": [],
         "train_acc": [],

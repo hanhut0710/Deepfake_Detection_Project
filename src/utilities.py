@@ -68,6 +68,7 @@ def predict_video(model, video_path, transform, device):
     # print("Confidence:", confidence)
 
     return label, score
+    
 
 def predict_video_with_LSTM(model, video_path, transform, device):
     model.eval()
@@ -104,37 +105,38 @@ def predict_video_with_LSTM(model, video_path, transform, device):
     return label, prob
 
 def plot_history(history):
-
     epochs = range(1, len(history["train_loss"]) + 1)
 
+    plt.figure(figsize=(15,5))
+
     # Loss
-    plt.figure()
+    plt.subplot(1,3,1)
     plt.plot(epochs, history["train_loss"], label="Train Loss")
     plt.plot(epochs, history["val_loss"], label="Val Loss")
-    plt.legend()
     plt.title("Loss Curve")
     plt.xlabel("Epoch")
     plt.ylabel("Loss")
-    plt.show()
+    plt.legend()
 
     # Accuracy
-    plt.figure()
+    plt.subplot(1,3,2)
     plt.plot(epochs, history["train_acc"], label="Train Acc")
     plt.plot(epochs, history["val_acc"], label="Val Acc")
-    plt.legend()
     plt.title("Accuracy Curve")
     plt.xlabel("Epoch")
     plt.ylabel("Accuracy")
-    plt.show()
+    plt.legend()
 
-    #Learning rate
-    plt.figure()
-    plt.plot(epochs, history['lr'], marker="o", label="Learning rate") 
+    # Learning rate
+    plt.subplot(1,3,3)
+    plt.plot(epochs, history['lr'], marker="o", label="LR")
+    plt.title("Learning Rate")
     plt.xlabel("Epoch")
-    plt.ylabel("Learning rate")
-    plt.title("Learning rate")
+    plt.ylabel("LR")
     plt.legend()
     plt.grid(alpha=0.3)
+
+    plt.tight_layout()
     plt.show()
 
 def plot_roc_curve(y_true, y_probs, save_path=None):
@@ -492,17 +494,16 @@ def predict_video_visual_with_LSTM(model, video_path, transform, device, output_
                 thickness,
                 cv2.LINE_AA,
             )
-        else:
-            cv2.putText(
-                frame,
-                f"Probability: ({prob:.2f})",
-                (x, y),
-                font,
-                font_scale,
-                color,
-                thickness,
-                cv2.LINE_AA,
-            )
+        # else:
+        #     cv2.putText(
+        #         frame,
+        #         (x, y),
+        #         font,
+        #         font_scale,
+        #         color,
+        #         thickness,
+        #         cv2.LINE_AA,
+        #     )
 
         out.write(frame)
 
